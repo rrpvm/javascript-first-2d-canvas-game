@@ -1,193 +1,185 @@
-let canvas = document.getElementById('canvas');
-let ctx = canvas.getContext('2d');
-document.addEventListener('keydown', moving);
-document.addEventListener('keyup', movingUp);
+const game_canvas = document.getElementById('game_canvas',{ alpha: false });
+const ctx = game_canvas.getContext('2d');
+const life_out = document.querySelector('.life');
+const score_out = document.querySelector('.score');
+const speed_out = document.querySelector('.speed');
+const player = new Image();
+let bomb_img = new Image();
+let bombs_arr = [{
+	position_x : 0,
+	position_y : 0,
+}];
 
-var player = new Image();
-player.src = 'player.png';
-var bomb = new Image();
-bomb.src = 'bomb.png';
-
-let posX = 0;
-let posY = 95;
-
-let posBx = [];
-let posBy = [];
-let bombs = 0;
-let count = 0;
-
-let score = 0;
+/*much of declaration & initializations*/
+const player_width = 50;
+const player_height = 12;
+const bomb_width = 35;
+const bomb_height = 35;
+const player_dirrection_variants = ["left", "right", "none"];
+const player_pos_y = game_canvas.height - player_height;
+const speed_multiply = 0.0001;
+const base_bomb_velocity = 0.85;
+let player_pos_x = 0;
+let current_player_direction = player_dirrection_variants[2];
+let bomb_counter = 0;
 let health = 3;
-var dirR = false;
-var dirL = false;
-let maxScore;
-function moving(e)
-{
-	if(health > 0)
+let score = 0;
+let bombs_catched_without_fail = 0;
+/*function key_translator(event);
+function key_break_handler(event);
+function on_load_doc();
+function cmd();*/
+
+
+
+
+ const restart = ()=>{
+ 	console.log('restarted');
+ 	ctx.clearRect(0,0,9999,9999);
+ 	score = 0;
+ 	health = 3;
+ 	player_pos_x = 0;
+ 	bomb_counter = 0;
+ 	bombs_catched_without_fail = 0;
+ 	current_player_direction = player_dirrection_variants[2];
+ }
+
+const draw_player = (pos_x, pos_y, width, height)=>{
+ctx.drawImage(player, Math.floor(pos_x), Math.floor(pos_y), width, height);
+ctx.strokeRect(player, Math.floor(pos_x), Math.floor(pos_y), width, height);
+}
+const draw_bombs = ()=>{
+	ctx.strokeStyle = 'rgb(255, 0, 0)';
+	for(let i = 0; i < bomb_counter;i++){
+	ctx.strokeRect(bombs_arr[i].position_x,  bombs_arr[i].position_y, bomb_width, bomb_height);
+	ctx.drawImage(bomb_img, bombs_arr[i].position_x,  bombs_arr[i].position_y, bomb_width, bomb_height);
+	}
+}
+const draw_ui = ()=>{
+	/*  ctx.font = "1.5em Calibri";
+	  let text_width = ctx.measureText("health "+health); 	 
+  	  ctx.strokeText("health "+health, game_canvas.width - text_width.width, text_width.width/2);*/
+  	  score_out.innerHTML = "score: " + score;
+  	  life_out	.innerHTML = "life: " + health;
+  	  speed_out	.innerHTML = "speed: " +(speed_multiply * score).toFixed(2);
+}
+let generate_bomb = ()=>{
+	bombs_arr[bomb_counter] = new Object();
+	bombs_arr[bomb_counter].position_x = Math.floor(Math.random() * Math.floor(game_canvas.width - bomb_width));
+	bombs_arr[bomb_counter].position_y = Math.floor(Math.random() * Math.floor(0 + game_canvas.height/10));
+	bomb_counter++;
+}
+let engine = ()=>{
+	ctx.clearRect(0, 0, game_canvas.width, game_canvas.height);
+	if(health > 0){
+	draw_player(player_pos_x, player_pos_y, player_width, player_height);
+	draw_bombs();
+	draw_ui();
+	cmd();
+	}
+	else{	
+		life_out.innerHTML = "0, GAME WILL RESTART";
+		alert('GAME OVER');
+		setTimeout(restart(), 3000);
+	}
+	window.requestAnimationFrame(engine);
+}
+function cmd(){
+	if(current_player_direction == player_dirrection_variants[1])
 	{
-		var key = e.keyCode;
-	
-		switch(key)
+		if(player_pos_x + player_width <= game_canvas.width)player_pos_x+=1.5 + (score*speed_multiply/2);
+	}
+	else if(current_player_direction == player_dirrection_variants[0])
+	{
+	if(player_pos_x  >= 0)player_pos_x-=1.5 - (score*speed_multiply/2);
+	}
+	/*else{
+	}*/
+	for(let i=0; i < bomb_counter;i++)
+	{
+		bombs_arr[i].position_y+=base_bomb_velocity + (speed_multiply*score);
+		if(touch_bb_rect(bombs_arr[i].position_x,bombs_arr[i].position_y,bomb_width, bomb_height,player_pos_x, player_pos_y, player_width, player_height))
 		{
-			case 39:
+			bombs_arr[i] = null;
+			for(let j = i+1; j < bomb_counter;j++)
 			{
-				dirR = true;
-				dirL = false;
-				break;
+				bombs_arr[i] = bombs_arr[j];
 			}
-			case 37:
+			bomb_counter--;
+			score+=100;
+			bombs_catched_without_fail++;
+			if(bombs_catched_without_fail == 10){
+				bombs_catched_without_fail = 0;
+				health++;
+			}
+			continue;
+		}
+		if(touch_bb_rect(bombs_arr[i].position_x,bombs_arr[i].position_y,bomb_width, bomb_height,0, game_canvas.height, game_canvas.width, game_canvas.height))
+		{
+			bombs_arr[i] = null;
+			for(let j = i+1; j < bomb_counter;j++)
 			{
-				dirR = false;
-				dirL = true;
-				break;
+				bombs_arr[i] = bombs_arr[j];
 			}
-
+			bomb_counter--;
+			health--;
+			bombs_catched_without_fail = 0;
 		}
 	}
 }
-function movingUp(e)
-{
-	if(health > 0)
+
+document.addEventListener('DOMContentLoaded', on_load_doc);
+function key_translator(event){
+	//console.log(event);
+	switch(event.keyCode)
 	{
-		var key = e.keyCode;
-	
-		switch(key)
+		case 39://right
 		{
-			case 39:
-			{
-				dirR = false;
-				dirL = false;
-				break;
-			}
-			case 37:
-			{
-				dirR = false;
-				dirL = false;
-				break;
-			}
-
+			current_player_direction = player_dirrection_variants[1];
+			break;
+		}
+		case 37://left
+		{
+			current_player_direction = player_dirrection_variants[0];
+			break;
+		}
+		default:
+		{
+			current_player_direction = player_dirrection_variants[2];
+			break;
 		}
 	}
 }
-function doMove()
-{
-if(dirR == true)
-{
-	posX = posX + 3;
+function key_break_handler(event){
+	current_player_direction = player_dirrection_variants[2];
 }
-if(dirL == true)
-{
-	posX = posX - 3;
+function on_load_doc(){
+	console.log('started');
+	player.src = 'player.png';
+	bomb_img.src = 'bomb.png';
+	engine();
+	document.addEventListener('keydown', key_translator);
+	document.addEventListener('keyup', key_break_handler);
+	let i = setInterval(function(){
+		generate_bomb();
+	}, 1250);
+	//generate_bomb();
 }
-if(posX -5 < 0)
-		{
-			dirL = false;
-			console.log("borders");
-			posX+=8;
-		}
-		if(posX +62.5 > canvas.width)
-		{
-			dirR = false;
-			console.log("borders");
-			posX-=8;
-		}
-}
-
-	function spawnBomb()
+const in_bb_rect = function(x_bb,y_bb, w_bb,h_bb, x_rgfl, y_rgfl, w_rgfl, h_rgfl)//if rect INSIDE other rect
 {
-	if(count % 2 == 0)
+	if(x_bb >= x_rgfl && x_bb + w_bb <= x_rgfl + w_rgfl )
 	{
-		posBx[count] = parseInt(Math.random(300,400) * 100);
+		if(y_bb >= y_rgfl && y_bb + h_bb <= y_rgfl + h_rgfl )return true;
 	}
-	else
-	{
-		posBx[count] = parseInt(Math.random(600,1200) * 100);
-	}
-posBy[count] = parseInt(-20);
-count++;
+	return false;
 }
-function collision()
+const touch_bb_rect = function(x_bb,y_bb, w_bb,h_bb, x_rgfl, y_rgfl, w_rgfl, h_rgfl)//if rect can touch other rect(or inside him)
 {
-	for(var i = 0; i < count; i++)
+	if((x_bb <= x_rgfl + w_rgfl && x_bb >= x_rgfl) || (x_bb <= x_rgfl && x_bb + w_bb >= x_rgfl))
 	{
-		var rez = posX + posY;
-		var rez2 = posBx[i] + posBy[i];
-		if(rez - rez2 < 15 && rez > 110)
-		{
-			//console.log(rez);
-			//console.log(rez2);
-		//console.log(rez-rez2);
-			posBy[i] = -100;
-			score +=100;
-				ctx.clearRect(posBx[i],posBy[i], bomb.width, bomb.height);
+		if(y_bb <= y_rgfl && y_bb  +h_bb>= y_rgfl){		
+			return true;
 		}
-		if(rez < 110 && rez - rez2 < -30)
-		{
-			score +=100;
-			posBy[i] = -100;
-				ctx.clearRect(posBx[i],posBy[i], bomb.width, bomb.height);
-		}
-		
-		
 	}
+	return false;
 }
-
-function draw()
-{
-if(health > 0)
-{
-
-	ctx.clearRect(0,0, canvas.width, canvas.height);
-	ctx.drawImage(player,posX,posY);
- ctx.font = "12px serif";
- ctx.fillText("health = " + health, 235, 15);
- ctx.fillText("score = " + score, 235, 25);
- collision();
-for(let i = 0; i < count; i++)
-{
-	posBy[i] = posBy[i] + 1;
-	if(posBy[i] + 50 > canvas.height)
-	{
-		count--;
-		health--;
-		posBy[i] = -64;
-		ctx.clearRect(posBx[i],posBy[i], bomb.width, bomb.height);
-		
-	}
-	else
-	{
-		if(posBy[i] > 0)
-		{
-				ctx.drawImage(bomb, posBx[i],posBy[i]);
-		}
-	
-	}
-
-}
-
-
-}
-else
-{
-ctx.clearRect(0,0, canvas.width, canvas.height);
-ctx.font = "48px serif";
-ctx.fillText("GAME OVER", 10,80);
-
-
-}
-}
-
-
-
-
-
-
-	var timer = setInterval(draw, 700/10);
-	var timer1 = setInterval(doMove, 900/10);
-var timerToSpawnBomb = setInterval(spawnBomb, 3000);
-
-
-
-
-
-

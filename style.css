@@ -1,33 +1,55 @@
-body
-{
+body {
 	margin: 0;
 	padding: 0;
 }
-*
-{
+
+* {
 	box-sizing: border-box;
 }
 
-header
-{
+header {
 	display: flex;
 	align-items: center;
-	width: 100%;
-	min-height: 100vh;
-	height: 100%;
-	background: indigo;
+	width: 90vw !important;
+	height: 90vh !important;
+	background: rgb(245, 245, 245);
 	flex-direction: column;
+	justify-content: center;
+	margin-top: 5vh;
+	margin-left: 5vw;
+	/*box-shadow: 0px 0px 15px 4px rgb(194, 0, 171);*/
+	border-radius: 1vw;
+	animation-name: noname;
+	animation-duration: 1s;
+	transition: all 1s;
+	animation-direction: alternate;
+	animation-iteration-count: infinite;
 }
-h2
-{
-	color: white;
-	padding: 0;
-	margin: 0;
+
+@keyframes noname {
+	0% {
+		box-shadow: 0px 0px 5px 4px rgb(255, 8, 239);
+	}
+
+	100% {
+		box-shadow: 0px 0px 15px 4px rgb(194, 0, 171);
+	}
 }
-.canvas
-{
-	margin-top: 80px;
-	width: 768px;
-	height: 480px;
-	background: white;
+
+.canvas {
+	margin-top: 5%;
+	margin-bottom: 5%;
+	margin-left: 0vw;
+	margin-right: 0vw;
+	width: 100%;
+	height: 90%;
+	transform: scale(0.8);
+}
+
+.Output {
+	font-size: 2rem;
+	align-self: flex-end;
+	margin-right: 5vw;
+	display: flex;
+	flex-direction: column;
 }
