@@ -17,8 +17,8 @@ const bomb_width = 35;
 const bomb_height = 35;
 const player_dirrection_variants = ["left", "right", "none"];
 const player_pos_y = game_canvas.height - player_height;
-const speed_multiply = 0.0001;
-const base_bomb_velocity = 0.85;
+const speed_multiply = 0.00007;
+const base_bomb_velocity = 0.69;
 let player_pos_x = 0;
 let current_player_direction = player_dirrection_variants[2];
 let bomb_counter = 0;
@@ -66,7 +66,7 @@ const draw_ui = ()=>{
 let generate_bomb = ()=>{
 	bombs_arr[bomb_counter] = new Object();
 	bombs_arr[bomb_counter].position_x = Math.floor(Math.random() * Math.floor(game_canvas.width - bomb_width));
-	bombs_arr[bomb_counter].position_y = Math.floor(Math.random() * Math.floor(0 + game_canvas.height/10));
+	bombs_arr[bomb_counter].position_y = Math.floor(Math.random() * Math.floor(0 + game_canvas.height/15));
 	bomb_counter++;
 }
 let engine = ()=>{
@@ -87,7 +87,7 @@ let engine = ()=>{
 function cmd(){
 	if(current_player_direction == player_dirrection_variants[1])
 	{
-		if(player_pos_x + player_width <= game_canvas.width)player_pos_x+=1.5 + (score*speed_multiply/2);
+		if(player_pos_x + player_width <= game_canvas.width)player_pos_x+=1.5 + (score*speed_multiply);
 	}
 	else if(current_player_direction == player_dirrection_variants[0])
 	{
@@ -162,7 +162,7 @@ function on_load_doc(){
 	document.addEventListener('keyup', key_break_handler);
 	let i = setInterval(function(){
 		generate_bomb();
-	}, 1250);
+	}, 1050);
 	//generate_bomb();
 }
 const in_bb_rect = function(x_bb,y_bb, w_bb,h_bb, x_rgfl, y_rgfl, w_rgfl, h_rgfl)//if rect INSIDE other rect
