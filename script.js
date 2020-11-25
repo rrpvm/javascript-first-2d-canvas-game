@@ -98,7 +98,7 @@ function cmd(){
 	for(let i=0; i < bomb_counter;i++)
 	{
 		bombs_arr[i].position_y+=base_bomb_velocity + (speed_multiply*score);
-		if(touch_bb_rect(bombs_arr[i].position_x,bombs_arr[i].position_y,bomb_width, bomb_height,player_pos_x, player_pos_y, player_width, player_height))
+		if(touch_bb_rect(bombs_arr[i].position_x,bombs_arr[i].position_y,bomb_width, bomb_height,player_pos_x, player_pos_y, player_width, 2))
 		{
 			bombs_arr[i] = null;
 			for(let j = i+1; j < bomb_counter;j++)
